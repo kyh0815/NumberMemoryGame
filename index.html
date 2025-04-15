@@ -177,11 +177,26 @@
     }
 
     function generateNumber(length) {
-      let num = "";
-      for (let i = 0; i < length; i++) {
-        num += Math.floor(Math.random() * 10);
+      let requiredUnique = Math.min(length - 2, 5); // 최대 5개
+      let digits = [];
+
+      // 가능한 숫자 후보 섞기
+      let pool = [...Array(10).keys()]; // [0~9]
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
       }
-      return num;
+
+      // 필요한 개수만큼 고유 숫자 확보
+      const selectedDigits = pool.slice(0, requiredUnique);
+
+      // 그 숫자들로 길이에 맞춰서 채움
+      while (digits.length < length) {
+        const rand = selectedDigits[Math.floor(Math.random() * selectedDigits.length)];
+        digits.push(rand);
+      }
+
+      return digits.join('');
     }
 
     function nextRound() {
