@@ -132,6 +132,9 @@
     <h1>숫자 메모리 게임</h1>
     <div id="status">단계: 1 | 점수: 0</div>
     <div id="high-score">최고 점수: 0</div>
+    <div id="tap-hint" style="font-size: 0.8rem; color: #999; display: none; margin-bottom: 1rem;">
+        화면을 아무데나 탭해서 정답 입력화면으로 넘어갈 수 있어요.
+      </div>      
     <div id="game-box" onclick="skipToInput()"><span class="text-message">버튼을 눌러서 게임을 시작해주세요.</span></div>
     <div id="progress-bar"><div id="progress-fill"></div></div>
     <div id="instruction" style="display: none;">확인 버튼이나 Enter 키를 눌러 다음으로 넘어갈 수 있어요.</div>
@@ -189,6 +192,7 @@
       document.getElementById("instruction").style.display = "none";
       document.getElementById("progress-bar").style.display = "block";
       document.getElementById("progress-fill").style.width = "100%";
+      document.getElementById("tap-hint").style.display = "block";
       canSkip = true;
 
       setTimeout(() => {
@@ -214,6 +218,7 @@
       document.getElementById("input-section").style.display = "block";
       document.getElementById("instruction").style.display = "block";
       document.getElementById("user-input").focus();
+      document.getElementById("tap-hint").style.display = "none";
       canSkip = false;
     }
 
