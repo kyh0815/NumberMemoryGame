@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>숫자 메모리 게임</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f5f6fa;
+      color: #2c3e50;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+    }
+    #status {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      color: #555;
+    }
+    #high-score {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: #777;
+      display: block;
+    }
+    #game-box {
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      min-height: 2rem;
+      cursor: pointer;
+    }
+    .number-display {
+      font-size: 2.4rem;
+    }
+    .text-message {
+      font-size: 1.5rem;
+    }
+    #progress-bar {
+      height: 6px;
+      width: 100%;
+      background-color: #eee;
+      border-radius: 5px;
+      margin: 0.5rem 0 1rem 0;
+      overflow: hidden;
+      display: none;
+    }
+    #progress-fill {
+      height: 100%;
+      width: 100%;
+      background-color: #4a90e2;
+      transition: width linear;
+    }
+    #instruction {
+      font-size: 0.8rem;
+      color: #999;
+      margin-bottom: 1rem;
+    }
+    #input-section input {
+      font-size: 1.2rem;
+      padding: 0.5rem;
+      width: 80%;
+      margin-bottom: 1.5rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      font-size: 1rem;
+      padding: 0.6rem 1.2rem;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+    button:hover {
+      background-color: #357ABD;
+    }
+    #result-card {
+      display: none;
+      margin-top: 2rem;
+      background-color: #f0f2f5;
+      border-radius: 10px;
+      padding: 1.2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    #result-score {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    #result-keyword {
+      font-size: 1.4rem;
+      color: #4a90e2;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    #result-description {
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      color: #555;
+      white-space: pre-line;
+    }
+    .footer {
+      margin-top: 1.5rem;
+      font-size: 0.7rem;
+      color: #aaa;
+      text-align: center;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>숫자 메모리 게임</h1>
+    <div id="status">단계: 1 | 점수: 0</div>
+    <div id="high-score">최고 점수: 0</div>
+    <div id="game-box" onclick="skipToInput()"><span class="text-message">버튼을 눌러서 게임을 시작해주세요.</span></div>
+    <div id="progress-bar"><div id="progress-fill"></div></div>
+    <div id="instruction" style="display: none;">확인 버튼이나 Enter 키를 눌러 다음으로 넘어갈 수 있어요.</div>
+    <div id="start-section"><button onclick="showGameStart()">게임 시작</button></div>
+    <div id="input-section" style="display:none">
+      <input type="text" id="user-input" />
+      <button onclick="submitAnswer()">확인</button>
+    </div>
+    <div id="result-card">
+      <div id="result-score"></div>
+      <div id="result-keyword"></div>
+      <div id="result-description"></div>
+      <button onclick="resetToStart()">홈으로 돌아가기</button>
+    </div>
+    <div class="footer">Made By 후니</div>
+  </div>
+
+  <script>
+    let currentNumber = "";
+    let level = 1;
+    let score = 0;
+    let displayTimeout;
+    let canSkip = false;
+    let highScore = localStorage.getItem("highScore") || 0;
+    document.getElementById("high-score").innerText = `최고 점수: ${highScore}`;
+
+    function updateStatus() {
+      document.getElementById("status").innerText = `단계: ${level} | 점수: ${score}`;
+    }
+
+    function showGameStart() {
+      level = 1;
+      score = 0;
+      updateStatus();
+      document.getElementById("result-card").style.display = "none";
+      document.getElementById("start-section").style.display = "none";
+      document.getElementById("user-input").value = "";
+      document.getElementById("high-score").style.display = "none";
+      nextRound();
+    }
+
+    function generateNumber(length) {
+      let num = "";
+      for (let i = 0; i < length; i++) {
+        num += Math.floor(Math.random() * 10);
+      }
+      return num;
+    }
+
+    function nextRound() {
+      updateStatus();
+      currentNumber = generateNumber(level);
+      document.getElementById("game-box").innerHTML = `<span class='number-display'>${currentNumber}</span>`;
+      document.getElementById("input-section").style.display = "none";
+      document.getElementById("instruction").style.display = "none";
+      document.getElementById("progress-bar").style.display = "block";
+      document.getElementById("progress-fill").style.width = "100%";
+      canSkip = true;
+
+      setTimeout(() => {
+        document.getElementById("progress-fill").style.transition = "width 3.5s linear";
+        document.getElementById("progress-fill").style.width = "0%";
+      }, 50);
+
+      displayTimeout = setTimeout(() => {
+        showInputField();
+      }, 3500);
+    }
+
+    function skipToInput() {
+      if (canSkip) {
+        clearTimeout(displayTimeout);
+        showInputField();
+      }
+    }
+
+    function showInputField() {
+      document.getElementById("progress-bar").style.display = "none";
+      document.getElementById("game-box").innerHTML = `<span class='text-message'>방금 본 숫자를 입력해주세요.</span>`;
+      document.getElementById("input-section").style.display = "block";
+      document.getElementById("instruction").style.display = "block";
+      document.getElementById("user-input").focus();
+      canSkip = false;
+    }
+
+    function submitAnswer() {
+      const input = document.getElementById("user-input").value.trim();
+      if (input === currentNumber.trim()) {
+        score++;
+        level++;
+        document.getElementById("user-input").value = "";
+        nextRound();
+      } else {
+        showResultCard();
+      }
+    }
+
+    function showResultCard() {
+      clearTimeout(displayTimeout);
+      document.getElementById("input-section").style.display = "none";
+      document.getElementById("instruction").style.display = "none";
+      document.getElementById("progress-bar").style.display = "none";
+
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("highScore", highScore);
+      }
+
+      const scoreText = `최종 점수 : ${score}점`;
+      let keyword = "", description = "";
+
+      if (score <= 3) {
+        keyword = "😅 내 사전에 암기란 없다";
+        description = "암기력이 많이 부족해요.\n조금 더 집중해보시면, 더 좋은 결과가 있을꺼에요.";
+      } else if (score <= 7) {
+        keyword = "😽 나는야 평균";
+        description = "보통의 암기력을 지니고 있어요.\n그만큼 포텐셜도 무궁무진하다는 사실!";
+      } else if (score <= 11) {
+        keyword = "💯 발군의 암기력!";
+        description = "암기력이 좋은 편이에요.\n어디 가서 암기력으로 꿀릴 일은 없어요.";
+      } else if (score <= 15) {
+        keyword = "🧠 암기대마왕!!";
+        description = "암기력이 아주 뛰어나요.\n상위 1~2% 이내의 암기력이에요.";
+      } else {
+        keyword = "👑 암기의 신";
+        description = "추가 설명이 필요없어요.\n당신을 암기의 신으로 임명합니다!";
+      }
+
+      document.getElementById("result-score").innerText = scoreText;
+      document.getElementById("result-keyword").innerText = keyword;
+      document.getElementById("result-description").innerText = description;
+      document.getElementById("result-card").style.display = "block";
+    }
+
+    function resetToStart() {
+      level = 1;
+      score = 0;
+      updateStatus();
+      document.getElementById("game-box").innerHTML = `<span class='text-message'>버튼을 눌러서 게임을 시작해주세요.</span>`;
+      document.getElementById("start-section").style.display = "block";
+      document.getElementById("result-card").style.display = "none";
+      document.getElementById("progress-bar").style.display = "none";
+      document.getElementById("progress-fill").style.transition = "none";
+      document.getElementById("progress-fill").style.width = "100%";
+      document.getElementById("high-score").innerText = `최고 점수: ${localStorage.getItem("highScore") || 0}`;
+      document.getElementById("high-score").style.display = "block";
+    }
+
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && document.getElementById("input-section").style.display !== "none") {
+        submitAnswer();
+      }
+    });
+  </script>
+</body>
+</html>
