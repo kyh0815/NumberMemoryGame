@@ -177,26 +177,24 @@
     }
 
     function generateNumber(length) {
-      let requiredUnique = Math.min(length - 2, 5); // 최대 5개
-      let digits = [];
+      const requiredUnique = Math.min(length - 2, 5); // 최소 필요한 고유 숫자 개수
+  let result = "";
 
-      // 가능한 숫자 후보 섞기
-      let pool = [...Array(10).keys()]; // [0~9]
-      for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-      }
+  while (true) {
+    let candidate = "";
+    for (let i = 0; i < length; i++) {
+      candidate += Math.floor(Math.random() * 10);
+    }
 
-      // 필요한 개수만큼 고유 숫자 확보
-      const selectedDigits = pool.slice(0, requiredUnique);
+    const uniqueCount = new Set(candidate).size;
 
-      // 그 숫자들로 길이에 맞춰서 채움
-      while (digits.length < length) {
-        const rand = selectedDigits[Math.floor(Math.random() * selectedDigits.length)];
-        digits.push(rand);
-      }
+    if (uniqueCount >= requiredUnique) {
+      result = candidate;
+      break;
+    }
+  }
 
-      return digits.join('');
+  return result;
     }
 
     function nextRound() {
