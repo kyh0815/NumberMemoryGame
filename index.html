@@ -177,24 +177,29 @@
     }
 
     function generateNumber(length) {
-      const requiredUnique = Math.min(length - 2, 5); // 최소 필요한 고유 숫자 개수
-  let result = "";
+      let requiredUnique = 1;
 
-  while (true) {
-    let candidate = "";
-    for (let i = 0; i < length; i++) {
-      candidate += Math.floor(Math.random() * 10);
-    }
+if (length >= 4) {
+  requiredUnique = Math.min(length - 2, 5); // 최소 length-2, 최대 5
+}
 
-    const uniqueCount = new Set(candidate).size;
+let result = "";
 
-    if (uniqueCount >= requiredUnique) {
-      result = candidate;
-      break;
-    }
+while (true) {
+  let candidate = "";
+  for (let i = 0; i < length; i++) {
+    candidate += Math.floor(Math.random() * 10);
   }
 
-  return result;
+  const uniqueCount = new Set(candidate).size;
+
+  if (uniqueCount >= requiredUnique) {
+    result = candidate;
+    break;
+  }
+}
+
+return result;
     }
 
     function nextRound() {
